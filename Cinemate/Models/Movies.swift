@@ -24,6 +24,37 @@ struct Movie: Codable {
     var vote_count: Int = 0
 }
 
+struct Dates: Codable {
+    var maximum: String?
+    var minimum: String?
+}
+
+struct MovieInfo: Codable {
+    var dates: Dates? = nil
+    var page: Int = 0
+    var results: [Movie]? = nil
+    var total_pages: Int = 0
+    var total_results: Int = 0
+}
+
+struct Genre: Codable {
+    var id: Int = 0
+    var name: String? = nil
+}
+
+struct ProductionCompany: Codable {
+    var id: Int = 0
+    var logo_path: String? = nil
+    var name: String? = nil
+    var origin_country: [String]? = nil
+}
+
+struct ProductionCountry: Codable {
+    var iso_3166_1: String? = nil
+    var name: String? = nil
+}
+
+
 struct MovieDetails: Codable {
     var id: Int = 0
     var adult: Bool = true
@@ -47,34 +78,4 @@ struct MovieDetails: Codable {
     var video: Bool = true
     var vote_average: Double = 0.0
     var vote_count: Int = 0
-}
-
-struct MovieInfo: Codable {
-    var dates: Dates? = nil
-    var page: Int = 0
-    var results: [Movie]? = nil
-    var total_pages: Int = 0
-    var total_results: Int = 0
-}
-
-struct Dates: Codable {
-    var maximum: String?
-    var minimum: String?
-}
-
-struct Genre: Codable {
-    var id: Int = 0
-    var name: String? = nil
-}
-
-struct ProductionCompany: Codable {
-    var id: Int = 0
-    var logo_path: String? = nil
-    var name: String? = nil
-    var origin_country: [String]? = nil
-}
-
-struct ProductionCountry: Codable {
-    var iso_3166_1: String? = nil
-    var name: String? = nil
 }
