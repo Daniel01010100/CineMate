@@ -10,7 +10,6 @@ import Observation
 
 @Observable
 final class CineMateViewModel {
-    var movies: [Movie] = []
     var user: UserProfile = .init()
     
     
