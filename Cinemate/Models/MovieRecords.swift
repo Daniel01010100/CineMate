@@ -6,11 +6,12 @@
 //
 
 import Foundation
-import CoreLocation
 
-struct MovieRecords: Codable {
+struct MovieRecords: Identifiable, Codable {
+    var id: UUID = UUID()
     var movieId: Int = 0
-    var place: CLLocationCoordinate2D? = nil
-    var date: Date? = nil
+    var cinemaId: UUID? = nil
+    var dateWatched: Date? = nil
     var userRating: Double? = nil
 }
+

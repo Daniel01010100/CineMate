@@ -28,10 +28,10 @@ class APIManager : APIManagerProtocol {
         ]
     }
     
-    /*
-     @Brief
-        Obtain a list of movies that ordered by popularity.
-     @Param
+    /**
+     Obtain a list of movies that ordered by popularity.
+     
+     - Parameters:
         language (Languages):   Defaults to en-US.
         page (Int32):       Default to 1, the page of results.
         region (Regions):     The ISO-3166-1 code that represent region.
@@ -61,10 +61,10 @@ class APIManager : APIManagerProtocol {
         return popularMovie
     }
     
-    /*
-     @Brief
-        Search movies for query and obtain a list of movies.
-     @Param
+    /**
+     Search movies for query and obtain a list of movies.
+     
+     - Parameters:
         query (String):     The keyword for movie-searching function.
         includeAdult (Bool):    Whether to returns the movies for adults.
         language (Languages):      Defaults to en-US.
@@ -100,13 +100,13 @@ class APIManager : APIManagerProtocol {
         jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
         let searchResult = try jsonDecoder.decode(MovieInfo.self, from: data)
         
+        print(searchResult)
         return searchResult
     }
     
-    /*
-     @Brief
-        Obtain a list of now playing movies.
-     @Param
+    /**
+     Obtain a list of now playing movies.
+     - Parameters:
         language (Languages):   Defaults to en-US.
         page (Int32):       Default to 1, the page of results.
         region (Regions):     The ISO-3166-1 code that represent region.
@@ -137,10 +137,10 @@ class APIManager : APIManagerProtocol {
         return playingMovies
     }
     
-    /*
-     @Brief
-        Obtain a list of upcoming movies.
-     @Param
+    /**
+     Obtain a list of upcoming movies.
+     
+     - Parameters:
         language (Languages):   Defaults to en-US.
         page (Int32):       Default to 1, the page of results.
         region (Regions):     The ISO-3166-1 code that represent region.
@@ -170,10 +170,10 @@ class APIManager : APIManagerProtocol {
         return upComingMovies
     }
     
-    /*
-     @Brief
-        Obtain the detail of selected movie.
-     @Param
+    /**
+     Obtain the detail of selected movie.
+     
+     - Parameters:
         movieId (Int32):    The id of selected movie.
         appendToResponse(String):   Which part of movie info should be appended.
         language (Languages):   Defaults to en-US.

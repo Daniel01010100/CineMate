@@ -9,49 +9,124 @@ import CoreData
 
 struct PersistenceController {
     static let shared = PersistenceController()
-
-    @MainActor
-    static let preview: PersistenceController = {
-        let result = PersistenceController(inMemory: true)
-        let viewContext = result.container.viewContext
+    
+    // Preview instance using in-memory storage (e.g., for SwiftUI previews)
+    static var preview: PersistenceController = {
+        let result = PersistenceController(inMemory: true) // Create an instance with in-memory storage
+        let viewContext = result.container.viewContext // Get the view context from the container
         for _ in 0..<10 {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
+            // Create 10 new favorite station objects using KVC to avoid Movie symbol conflict
+            let newItem = NSEntityDescription.insertNewObject(forEntityName: "Movie", into: viewContext)
+            newItem.setValue(Date(), forKey: "addtime") // Set the add time to the current date
         }
         do {
-            try viewContext.save()
+            try viewContext.save() // Save the context to persist the new objects
         } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+            // Handle error if unable to save context
             let nsError = error as NSError
             fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
         }
-        return result
+        return result // Return the instance for preview
     }()
 
-    let container: NSPersistentContainer
+    let container: NSPersistentContainer // Main persistent container
 
     init(inMemory: Bool = false) {
-        container = NSPersistentContainer(name: "Cinemate")
+        container = NSPersistentContainer(name: "Cinemate") // Initialize container with the model name
         if inMemory {
+            // Configure in-memory store
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
+            // Handle error during store loading
             if let error = error as NSError? {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-
-                /*
-                 Typical reasons for an error here include:
-                 * The parent directory does not exist, cannot be created, or disallows writing.
-                 * The persistent store is not accessible, due to permissions or data protection when the device is locked.
-                 * The device is out of space.
-                 * The store could not be migrated to the current model version.
-                 Check the error message to determine what the actual problem was.
-                 */
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }
         })
-        container.viewContext.automaticallyMergesChangesFromParent = true
+        container.viewContext.automaticallyMergesChangesFromParent = true // Automatically merge changes from parent context
+    }
+    
+    func saveNowPlayingMoviesToCoreData(_ movies: [MovieBasics]) {
+        let context = container.viewContext
+
+        // Remove previous entries
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = Movie.fetchRequest()
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        do {
+            try context.execute(deleteRequest)
+        } catch {
+            print("Failed to clear existing movies: \(error)")
+        }
+
+        // Save new movies
+        for movie in movies {
+            let entity = Movie(context: context)
+            entity.id = Int64(movie.id)
+            entity.adult = movie.adult
+            entity.backdropPath = movie.backdropPath ?? ""
+            entity.originalLanguage = movie.originalLanguage ?? ""
+            entity.originalTitle = movie.originalTitle ?? ""
+            entity.overview = movie.overview ?? ""
+            entity.popularity = movie.popularity ?? 0
+            entity.posterPath = movie.posterPath ?? ""
+            entity.releaseDate = movie.releaseDate ?? ""
+            entity.title = movie.title ?? ""
+            entity.voteAverage = movie.voteAverage ?? 0.0
+            entity.voteCount = Int64(movie.voteCount ?? 0)
+            
+            if let genreIds = movie.genreIds {
+                    for gid in genreIds {
+                        let fetch: NSFetchRequest<Genre> = Genre.fetchRequest()
+                        fetch.predicate = NSPredicate(format: "id == %d", gid)
+                        fetch.fetchLimit = 1
+
+                        if let existing = try? context.fetch(fetch).first {
+                            entity.addToGenre(existing)
+                        } else {
+                            let newGenre = Genre(context: context)
+                            newGenre.id = Int64(gid)
+                            entity.addToGenre(newGenre)
+                        }
+                    }
+                }
+        }
+
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save movies: \(error)")
+        }
+    }
+    
+    func loadNowPlayingMoviesFromCoreData() throws -> [MovieBasics] {
+        let context = container.viewContext
+        let fetchRequest: NSFetchRequest<Movie> = Movie.fetchRequest()
+        
+        do {
+            let movieEntities = try context.fetch(fetchRequest)
+            let movies: [MovieBasics] = movieEntities.map { entity in
+                var basics = MovieBasics()
+                basics.id = Int(entity.id)
+                basics.adult = entity.adult
+                basics.backdropPath = entity.backdropPath
+                basics.originalLanguage = entity.originalLanguage
+                basics.originalTitle = entity.originalTitle
+                basics.overview = entity.overview
+                basics.popularity = entity.popularity
+                basics.posterPath = entity.posterPath
+                basics.releaseDate = entity.releaseDate
+                basics.title = entity.title
+                basics.voteAverage = entity.voteAverage
+                basics.voteCount = Int(entity.voteCount)
+                
+                if let genres = entity.genre as? Set<Genre> {
+                    basics.genreIds = genres.map { Int($0.id) }
+                }
+                return basics
+            }
+            return movies
+        } catch {
+            throw error
+        }
     }
 }

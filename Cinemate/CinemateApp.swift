@@ -9,12 +9,12 @@ import SwiftUI
 
 @main
 struct CinemateApp: App {
+    var cmvm: CineMateViewModel = CineMateViewModel()
     let persistenceController = PersistenceController.shared
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            ContentView(cmvm: cmvm)
         }
     }
 }

@@ -8,9 +8,23 @@
 import Foundation
 
 struct UserProfile: Codable {
-    var id: UUID = UUID()
-    var currentRegion: ISO_3166_1
-    var preferredLanguage: String?
-    var favouriteMoviesIds: [Int] = []
-    var recordedMovies: [MovieRecords] = []
+    var id: UUID
+    var currentRegion: Regions
+    var preferredLanguage: Languages
+    var favouriteMoviesIds: [Int32] = []
+    var favouriteCinemaIds: [UUID] = []
+    var movieRecords: [MovieRecords] = []
+    var watchlist: [Int32] = []
+    
+    init() {
+        self.id = UUID()
+        self.currentRegion = .Australia
+        self.preferredLanguage = .English
+    }
+    
+    init(_ region: Regions, _ language: Languages) {
+        self.id = UUID()
+        self.currentRegion = region
+        self.preferredLanguage = language
+    }
 }

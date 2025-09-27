@@ -7,21 +7,21 @@
 
 import Foundation
 
-struct Movie: Codable {
+struct MovieBasics: Codable {
     var id: Int = 0
     var adult: Bool = true
-    var backdrop_path: String? = nil
-    var genre_ids: [Int]? = nil
-    var original_language: String? = nil
-    var original_title: String? = nil
+    var backdropPath: String? = nil
+    var genreIds: [Int]? = nil
+    var originalLanguage: String? = nil
+    var originalTitle: String? = nil
     var overview: String? = nil
-    var popularity: Double = 0.0
-    var poster_path: String? = nil
-    var release_date: String? = nil
+    var popularity: Double? = nil
+    var posterPath: String? = nil
+    var releaseDate: String? = nil
     var title: String? = nil
-    var video: Bool = true
-    var vote_average: Double = 0.0
-    var vote_count: Int = 0
+    var video: Bool = false
+    var voteAverage: Double? = nil
+    var voteCount: Int? = nil
 }
 
 struct Dates: Codable {
@@ -32,12 +32,12 @@ struct Dates: Codable {
 struct MovieInfo: Codable {
     var dates: Dates? = nil
     var page: Int = 0
-    var results: [Movie]? = nil
-    var total_pages: Int = 0
-    var total_results: Int = 0
+    var results: [MovieBasics]? = nil
+    var totalPages: Int? = nil
+    var totalResults: Int? = nil
 }
 
-struct Genre: Codable {
+struct Genres: Codable {
     var id: Int = 0
     var name: String? = nil
 }
@@ -46,11 +46,11 @@ struct ProductionCompany: Codable {
     var id: Int = 0
     var logo_path: String? = nil
     var name: String? = nil
-    var origin_country: [String]? = nil
+    var origin_country: [Regions]? = nil
 }
 
 struct ProductionCountry: Codable {
-    var iso_3166_1: String? = nil
+    var iso_3166_1: Regions? = nil
     var name: String? = nil
 }
 
@@ -58,24 +58,24 @@ struct ProductionCountry: Codable {
 struct MovieDetails: Codable {
     var id: Int = 0
     var adult: Bool = true
-    var backdrop_path: String? = nil
-    var belongs_to_collection: String? = nil
+    var backdropPath: String? = nil
+    var belongsToCollection: String? = nil
     var budget: Int = 0
-    var genres: [Genre]? = nil
+    var genres: [Genres]? = nil
     var homepage: String? =  nil
-    var imdb_id: String? = nil
-    var original_language: String? = nil
-    var original_title: String? = nil
+    var imdbId: String? = nil
+    var originalLanguage: String? = nil
+    var originalTitle: String? = nil
     var overview: String? = nil
     var popularity: Double = 0.0
-    var poster_path: String? = nil
-    var production_companies: [ProductionCompany]? = nil
-    var production_countries: [ProductionCountry]? = nil
-    var release_date: String? = nil
+    var posterPath: String? = nil
+    var productionCompanies: [ProductionCompany]? = nil
+    var productionCountries: [ProductionCountry]? = nil
+    var releaseDate: String? = nil
     var revenue: Int = 0
     var runtime: Int = 0
     var title: String? = nil
     var video: Bool = true
-    var vote_average: Double = 0.0
-    var vote_count: Int = 0
+    var voteAverage: Double = 0.0
+    var voteCount: Int = 0
 }

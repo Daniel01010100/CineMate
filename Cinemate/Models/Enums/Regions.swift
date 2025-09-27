@@ -8,7 +8,7 @@
 import Foundation
 
 /* ISO_3166_1 */
-enum Regions : String, Codable {
+enum Regions : String, Codable, Identifiable, CaseIterable {
     case Andorra = "AD"
     case UnitedArabEmirates = "AE"
     case AntiguaBarbuda = "AG"
@@ -147,4 +147,17 @@ enum Regions : String, Codable {
     case Yemen = "YE"
     case SouthAfrica = "ZA"
     case Zambia = "ZM"
+    
+    var id: String { self.rawValue }
+
+    func convertISOToNationalFlag() -> String {
+        let base: UInt32 = 127397
+        var scalarView = String.UnicodeScalarView()
+        for scalar in self.rawValue.uppercased().unicodeScalars {
+            if let scalarFlag = UnicodeScalar(base + scalar.value) {
+                scalarView.append(scalarFlag)
+            }
+        }
+        return String(scalarView)
+    }
 }
