@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 import Observation
 
 @Observable
@@ -13,6 +14,8 @@ final class CineMateViewModel {
     var user: UserProfile = .init()
     var apiManager: APIManager = .init()
     var movies: [MovieBasics] = []
+    var movieDetails: MovieDetails? = nil
+    var cinemateColor = Color(red: 25/255, green: 25/255, blue: 112/255)
     private let _persistence = PersistenceController.shared
     
     /**
@@ -113,6 +116,14 @@ final class CineMateViewModel {
             self.movies = movies.results ?? []
         } catch {
             print("Error fetching search results: \(error)")
+        }
+    }
+    
+    func getMovieDetails(_ movieId: Int, _ language: Languages = .English) async {
+        do {
+            self.movieDetails = try await apiManager.fetchMovieDetails(Int32(movieId), "", language)
+        } catch {
+            print("Error fetching movie details: \(error)")
         }
     }
     

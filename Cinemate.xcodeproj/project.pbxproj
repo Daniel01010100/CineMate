@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		2F791DFA2E87938C003B5413 /* Cinemate.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2F791DF82E87938C003B5413 /* Cinemate.xcdatamodeld */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		2F2D87332E76A50E004EF593 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -31,7 +27,6 @@
 		2F2D871D2E76A50D004EF593 /* Cinemate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cinemate.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2F2D87322E76A50E004EF593 /* CinemateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CinemateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2F2D873C2E76A50E004EF593 /* CinemateUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CinemateUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		2F791DF92E87938C003B5413 /* Cinemate.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Cinemate.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -80,7 +75,6 @@
 		2F2D87142E76A50D004EF593 = {
 			isa = PBXGroup;
 			children = (
-				2F791DF82E87938C003B5413 /* Cinemate.xcdatamodeld */,
 				2F2D871F2E76A50D004EF593 /* Cinemate */,
 				2F2D87352E76A50E004EF593 /* CinemateTests */,
 				2F2D873F2E76A50E004EF593 /* CinemateUITests */,
@@ -242,7 +236,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2F791DFA2E87938C003B5413 /* Cinemate.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -565,19 +558,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCVersionGroup section */
-		2F791DF82E87938C003B5413 /* Cinemate.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				2F791DF92E87938C003B5413 /* Cinemate.xcdatamodel */,
-			);
-			currentVersion = 2F791DF92E87938C003B5413 /* Cinemate.xcdatamodel */;
-			path = Cinemate.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = 2F2D87152E76A50D004EF593 /* Project object */;
 }

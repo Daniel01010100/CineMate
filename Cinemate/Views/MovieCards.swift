@@ -44,7 +44,8 @@ struct MovieCards: View {
                 Text(movie.title ?? "")
                     .bold()
                     .font(.headline)
-                Text("Rating: \(movie.voteAverage ?? 0.0, specifier: "%.1f")")
+                Text("Rating: \(movie.voteAverage ?? 0.0, specifier: "%.1f") (\(movie.voteCount ?? 0)) votes")
+                Text("Release Date: \(movie.releaseDate ?? "")")
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

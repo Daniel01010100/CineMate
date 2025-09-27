@@ -100,7 +100,6 @@ class APIManager : APIManagerProtocol {
         jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
         let searchResult = try jsonDecoder.decode(MovieInfo.self, from: data)
         
-        print(searchResult)
         return searchResult
     }
     
@@ -178,7 +177,7 @@ class APIManager : APIManagerProtocol {
         appendToResponse(String):   Which part of movie info should be appended.
         language (Languages):   Defaults to en-US.
      */
-    func fetchMovieDetails(_ movieId: Int32, _ appendToResponse: String = "images",
+    func fetchMovieDetails(_ movieId: Int32, _ appendToResponse: String = "",
                            _ language: Languages = .English) async throws -> MovieDetails {
         guard let url = URL(string: "https://api.themoviedb.org/3/movie/\(movieId)") else {
             throw URLError(.badURL)
@@ -196,6 +195,7 @@ class APIManager : APIManagerProtocol {
         request.allHTTPHeaderFields = defaultHeaders
 
         let (data, _) = try await URLSession.shared.data(for: request)
+        print(String(decoding: data, as: UTF8.self))
         let jsonDecoder = JSONDecoder()
         jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
         let movieDetails = try jsonDecoder.decode(MovieDetails.self, from: data)
