@@ -13,49 +13,84 @@ import Observation
 final class CineMateViewModel {
     var user: UserProfile = .init()
     var apiManager: APIManager = .init()
+    var currentMode: MovieListMode = .nowPlaying
     var movies: [MovieBasics] = []
+    var watchlistMovies: [MovieBasics] = []
     var movieDetails: MovieDetails? = nil
-    var cinemateColor = Color(red: 25/255, green: 25/255, blue: 112/255)
+    var cinemateColor = Color(red: 30/255, green: 58/255, blue: 138/255)
     private let _persistence = PersistenceController.shared
     
     /**
      Determine whether the "Now playing" movies data should be updated.
      
      - Returns:
-        true - If the last updated date is earlier than today (Outdated).
-        false - If the last updated date is today (Up-to-date).
+        true - If the last updated date is older than 6 hours (Outdated).
+        false - If the last updated date is within 6 hours (Up-to-date).
      */
-    func shouldUpdateNowPlayingMovies() -> Bool {
+    func shouldUpdateMoviesData() -> Bool {
         let lastFet = "lastFetchDate"
-        let calendar = Calendar.current
-        let now = calendar.startOfDay(for: Date())
+        let ttl: TimeInterval = 6 * 3600    // refersh now playing movies and user's watchlist movies data per 6 hours.
+        let now = Date()
         
         if let lastFetchDate = UserDefaults.standard.object(forKey: lastFet) as? Date {
-            let lastDay = calendar.startOfDay(for: lastFetchDate)
-            if now == lastDay {
+            if now.timeIntervalSince(lastFetchDate) < ttl {
                 return false    // Already updated to the latest data.
             }
         }
         
-        UserDefaults.standard.set(Date(), forKey: lastFet)
+        UserDefaults.standard.set(now, forKey: lastFet)
         return true
     }
     
     /**
-     Update the "Now playing" movies data. If it's already up-to-date, then loaded from Core Data. Otherwise, it would be fetched from the API.
+     Update the data of movies "Now Playing" and user's watchlist. If it's already up-to-date, then loaded from Core Data. Otherwise, it would be fetched from the API.
      */
-    func loadNowPlayingIfNeeded() async {
-        guard shouldUpdateNowPlayingMovies() else {
-            do {
-                self.movies = try self._persistence.loadNowPlayingMoviesFromCoreData()
-            } catch {
-                print("Failed to load movies from CoreData: \(error)")
-            }
-            return
+    func loadMoviesDataIfNeeded() async {
+        // Data of watchlist movie should be loaded from Core Data
+        if shouldUpdateMoviesData() {
+            // If movie's data is outdated
+            await fetchWatchlistMovies()
+            self._persistence.saveWatchlistMoviesToCoreData(self.watchlistMovies)
+        } else {
+            // If movie's data is already up-to-date
+            self.watchlistMovies = self._persistence.loadWatchlistMoviesFromCoreData()
         }
+
+        switch currentMode {
+        case .nowPlaying:
+            if shouldUpdateMoviesData() {
+                // If movie's data is outdated
+                await fetchNowPlayingMovies()
+                self._persistence.saveNowPlayingMoviesToCoreData(self.movies)
+            } else {
+                // If movie's data is already up-to-date
+                do {
+                    self.movies = try self._persistence.loadNowPlayingMoviesFromCoreData()
+                } catch {
+                    print("Failed to load now playing movies from CoreData: \(error)")
+                }
+            }
+        default:
+            break
+        }
+    }
+    
+    /**
+     Get data of movies in the watchlist from the API.
+     */
+    func fetchWatchlistMovies() async {
+        let savedList = self._persistence.loadWatchlistMoviesFromCoreData()
+        var updatedList: [MovieBasics] = []
         
-        await fetchNowPlayingMovies()
-        self._persistence.saveNowPlayingMoviesToCoreData(self.movies)
+        for movie in savedList {
+            do {
+                let details = try await self.apiManager.fetchMovieDetails(Int32(movie.id))
+                updatedList.append(MovieBasics(details))
+            } catch {
+                print("Error fetching movie details for \(movie.id): \(error)")
+            }
+        }
+        self.watchlistMovies = updatedList
     }
     
     /**
@@ -76,7 +111,7 @@ final class CineMateViewModel {
             print("Error fetching now playing movies: \(error)")
         }
     }
-    
+
     /**
      Fetch the "Upcoming" movies data from the remote API.
      
@@ -112,11 +147,12 @@ final class CineMateViewModel {
         let lang = language ?? self.user.preferredLanguage
         let reg = region ?? self.user.currentRegion
         do {
-            let movies = try await apiManager.searchMovies(query, includeAdult, lang, releaseYear, 1, reg, "")
-            self.movies = movies.results ?? []
+            let searchResults = try await apiManager.searchMovies(query, includeAdult, lang, releaseYear, 1, reg, "")
+            self.movies = searchResults.results ?? []
         } catch {
             print("Error fetching search results: \(error)")
         }
+        self.currentMode = .search(query: query)
     }
     
     func getMovieDetails(_ movieId: Int, _ language: Languages = .English) async {
@@ -135,18 +171,30 @@ final class CineMateViewModel {
         user.currentRegion = region
     }
     
-    func addMovieToUserWatchList(_ movieId: Int32) {
-        if self.user.watchlist.contains(movieId) {
+    func addMovieToUserWatchlist(_ movie: MovieBasics) {
+        if self.user.watchlist.contains(movie.id) {
             return
         }
-        self.user.watchlist.append(movieId)
+        self.user.watchlist.append(movie.id)
+        self._persistence.addWatchlistMoviesToCoreData(movie)
     }
     
-    func delMovieFromUserWatchList(_ movieId: Int32) -> Bool {
-        if self.user.watchlist.firstIndex(of: movieId) == nil {
+    func delMovieFromUserWatchlist(_ movie: MovieBasics) -> Bool {
+        if self.user.watchlist.firstIndex(of: movie.id) == nil {
             return false
         }
-        self.user.watchlist.removeAll { $0 == movieId }
+        self.user.watchlist.removeAll { $0 == movie.id }
+        self._persistence.deleteMovieFromWatchlist(movie.id)
         return true
     }
+    
+    func getWatchlistMovies() -> [MovieBasics] {
+        return self._persistence.loadWatchlistMoviesFromCoreData()
+    }
+}
+
+enum MovieListMode {
+    case nowPlaying
+    case upcoming
+    case search(query: String)
 }

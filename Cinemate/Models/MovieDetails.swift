@@ -55,4 +55,18 @@ struct MovieDetails: Codable {
     var video: Bool = false
     var voteAverage: Double? = nil
     var voteCount: Int? = nil
+    
+    var backdropURL: URL? {
+        if let path = posterPath {
+            return URL(string: "https://image.tmdb.org/t/p/w500\(path)")
+        }
+        return nil
+    }
+    
+    var posterURL: URL? {
+        if let path = posterPath {
+            return URL(string: "https://image.tmdb.org/t/p/w500\(path)")
+        }
+        return nil
+    }
 }

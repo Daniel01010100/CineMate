@@ -14,7 +14,7 @@ struct UserProfile: Codable {
     var favouriteMoviesIds: [Int32] = []
     var favouriteCinemaIds: [UUID] = []
     var movieRecords: [MovieRecords] = []
-    var watchlist: [Int32] = []
+    var watchlist: [Int] = []
     
     init() {
         self.id = UUID()

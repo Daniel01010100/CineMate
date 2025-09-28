@@ -13,17 +13,10 @@ struct MovieDetailsView: View {
     var cmvm: CineMateViewModel
     @State private var details: MovieDetails? = nil
     
-    var posterURL: URL? {
-        if let path = details?.backdropPath {
-            return URL(string: "https://image.tmdb.org/t/p/w500\(path)")
-        }
-        return nil
-    }
-    
     var body: some View {
         ScrollView {
             if let detail = details {
-                AsyncImage(url: posterURL) { phase in
+                AsyncImage(url: detail.posterURL) { phase in
                     switch phase {
                     case .empty:
                         ProgressView()
@@ -110,9 +103,11 @@ struct MovieDetailsView: View {
                 Text("No specific details found")
             }
         }
-        .task {
-            await self.cmvm.getMovieDetails(self.movieId, self.language)
-            details = self.cmvm.movieDetails
+        .onAppear {
+            Task {
+                await self.cmvm.getMovieDetails(self.movieId, self.language)
+                details = self.cmvm.movieDetails
+            }
         }
     }
     

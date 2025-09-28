@@ -14,10 +14,14 @@ struct PersistenceController {
     static var preview: PersistenceController = {
         let result = PersistenceController(inMemory: true) // Create an instance with in-memory storage
         let viewContext = result.container.viewContext // Get the view context from the container
-        for _ in 0..<10 {
-            // Create 10 new favorite station objects using KVC to avoid Movie symbol conflict
-            let newItem = NSEntityDescription.insertNewObject(forEntityName: "Movie", into: viewContext)
-            newItem.setValue(Date(), forKey: "addtime") // Set the add time to the current date
+        for i in 0..<10 {
+            // Create 10 NowPlayingMovie preview objects
+            let item = NowPlayingMovie(context: viewContext)
+            item.id = Int64(i)
+            item.title = "Preview #\(i)"
+            item.releaseDate = "2025-01-0\((i % 9) + 1)"
+            item.posterPath = nil
+            item.backdropPath = nil
         }
         do {
             try viewContext.save() // Save the context to persist the new objects
@@ -44,63 +48,73 @@ struct PersistenceController {
             }
         })
         container.viewContext.automaticallyMergesChangesFromParent = true // Automatically merge changes from parent context
+        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
     }
     
     func saveNowPlayingMoviesToCoreData(_ movies: [MovieBasics]) {
         let context = container.viewContext
 
         // Remove previous entries
-        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = Movie.fetchRequest()
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NowPlayingMovie.fetchRequest()
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-        do {
-            try context.execute(deleteRequest)
-        } catch {
-            print("Failed to clear existing movies: \(error)")
-        }
+        deleteRequest.resultType = .resultTypeObjectIDs
+         do {
+             if let result = try context.execute(deleteRequest) as? NSBatchDeleteResult,
+                let objectIDs = result.result as? [NSManagedObjectID] {
+                 let changes: [AnyHashable: Any] = [NSDeletedObjectsKey: objectIDs]
+                 NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [context])
+             }
+         } catch {
+             print("Failed to clear existing movies: \(error)")
+         }
 
         // Save new movies
         for movie in movies {
-            let entity = Movie(context: context)
+            let entity = NowPlayingMovie(context: context)
             entity.id = Int64(movie.id)
             entity.adult = movie.adult
-            entity.backdropPath = movie.backdropPath ?? ""
+            entity.backdropPath = movie.backdropPath
             entity.originalLanguage = movie.originalLanguage ?? ""
             entity.originalTitle = movie.originalTitle ?? ""
             entity.overview = movie.overview ?? ""
             entity.popularity = movie.popularity ?? 0
-            entity.posterPath = movie.posterPath ?? ""
+            entity.posterPath = movie.posterPath
             entity.releaseDate = movie.releaseDate ?? ""
             entity.title = movie.title ?? ""
             entity.voteAverage = movie.voteAverage ?? 0.0
             entity.voteCount = Int64(movie.voteCount ?? 0)
             
             if let genreIds = movie.genreIds {
-                    for gid in genreIds {
-                        let fetch: NSFetchRequest<Genre> = Genre.fetchRequest()
-                        fetch.predicate = NSPredicate(format: "id == %d", gid)
-                        fetch.fetchLimit = 1
+                for gid in genreIds {
+                    let fetch: NSFetchRequest<Genre> = Genre.fetchRequest()
+                    fetch.predicate = NSPredicate(format: "id == %d", gid)
+                    fetch.fetchLimit = 1
 
-                        if let existing = try? context.fetch(fetch).first {
-                            entity.addToGenre(existing)
-                        } else {
-                            let newGenre = Genre(context: context)
-                            newGenre.id = Int64(gid)
-                            entity.addToGenre(newGenre)
-                        }
+                    if let existing = try? context.fetch(fetch).first {
+                        entity.addToGenre(existing)
+                    } else {
+                        let newGenre = Genre(context: context)
+                        newGenre.id = Int64(gid)
+                        entity.addToGenre(newGenre)
                     }
                 }
+            }
         }
 
         do {
             try context.save()
         } catch {
-            print("Failed to save movies: \(error)")
+            print("Failed to save now playing movies: \(error)")
         }
     }
     
     func loadNowPlayingMoviesFromCoreData() throws -> [MovieBasics] {
         let context = container.viewContext
-        let fetchRequest: NSFetchRequest<Movie> = Movie.fetchRequest()
+        let fetchRequest: NSFetchRequest<NowPlayingMovie> = NowPlayingMovie.fetchRequest()
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "popularity", ascending: false),
+            NSSortDescriptor(key: "title", ascending: true)
+        ]
         
         do {
             let movieEntities = try context.fetch(fetchRequest)
@@ -120,13 +134,176 @@ struct PersistenceController {
                 basics.voteCount = Int(entity.voteCount)
                 
                 if let genres = entity.genre as? Set<Genre> {
-                    basics.genreIds = genres.map { Int($0.id) }
+                    basics.genreIds = genres.map { Int($0.id) }.sorted()
                 }
                 return basics
             }
             return movies
         } catch {
             throw error
+        }
+    }
+    
+    func addWatchlistMoviesToCoreData(_ movie: MovieBasics) {
+        let context = container.viewContext
+
+        let fetch: NSFetchRequest<WatchlistMovie> = WatchlistMovie.fetchRequest()
+        fetch.predicate = NSPredicate(format: "id == %d", movie.id)
+        fetch.fetchLimit = 1
+
+        let entity: WatchlistMovie
+        if let existing = try? context.fetch(fetch).first {
+            entity = existing
+        } else {
+            entity = WatchlistMovie(context: context)
+            entity.id = Int64(movie.id)
+        }
+
+        // Update attributes fields
+        entity.adult = movie.adult
+        entity.backdropPath = movie.backdropPath
+        entity.originalLanguage = movie.originalLanguage ?? ""
+        entity.originalTitle = movie.originalTitle ?? ""
+        entity.overview = movie.overview ?? ""
+        entity.popularity = movie.popularity ?? 0
+        entity.posterPath = movie.posterPath
+        entity.releaseDate = movie.releaseDate ?? ""
+        entity.title = movie.title ?? ""
+        entity.voteAverage = movie.voteAverage ?? 0.0
+        entity.voteCount = Int64(movie.voteCount ?? 0)
+
+        // Sync genres (optional)
+        if let genreIds = movie.genreIds {
+            // Clear existing
+            if let existingGenres = entity.genre as? Set<Genre>, !existingGenres.isEmpty {
+                existingGenres.forEach { entity.removeFromGenre($0) }
+            }
+            // Attach from ids
+            for gid in genreIds {
+                let gf: NSFetchRequest<Genre> = Genre.fetchRequest()
+                gf.predicate = NSPredicate(format: "id == %d", gid)
+                gf.fetchLimit = 1
+                if let found = try? context.fetch(gf).first {
+                    entity.addToGenre(found)
+                } else {
+                    let newGenre = Genre(context: context)
+                    newGenre.id = Int64(gid)
+                    entity.addToGenre(newGenre)
+                }
+            }
+        }
+        // Save context
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save watchlist movie: \(error)")
+        }
+    }
+
+    func deleteMovieFromWatchlist(_ id: Int) {
+        let context = container.viewContext
+        let fetch: NSFetchRequest<WatchlistMovie> = WatchlistMovie.fetchRequest()
+        fetch.predicate = NSPredicate(format: "id == %d", id)
+        fetch.fetchLimit = 1
+
+        do {
+            if let target = try context.fetch(fetch).first {
+                context.delete(target)
+                try context.save()
+            }
+        } catch {
+            print("Failed to delete watchlist movie: \(error)")
+        }
+    }
+    
+    func saveWatchlistMoviesToCoreData(_ movies: [MovieBasics]) {
+        let context = container.viewContext
+        
+        for movie in movies {
+            let fetch: NSFetchRequest<WatchlistMovie> = WatchlistMovie.fetchRequest()
+            fetch.predicate = NSPredicate(format: "id == %d", movie.id)
+            fetch.fetchLimit = 1
+            
+            let entity: WatchlistMovie
+            if let existing = try? context.fetch(fetch).first {
+                entity = existing
+            } else {
+                entity = WatchlistMovie(context: context)
+                entity.id = Int64(movie.id)
+            }
+            
+            // Update attributes
+            entity.adult = movie.adult
+            entity.backdropPath = movie.backdropPath
+            entity.originalLanguage = movie.originalLanguage ?? ""
+            entity.originalTitle = movie.originalTitle ?? ""
+            entity.overview = movie.overview ?? ""
+            entity.popularity = movie.popularity ?? 0
+            entity.posterPath = movie.posterPath
+            entity.releaseDate = movie.releaseDate ?? ""
+            entity.title = movie.title ?? ""
+            entity.voteAverage = movie.voteAverage ?? 0.0
+            entity.voteCount = Int64(movie.voteCount ?? 0)
+            
+            // Sync genres
+            if let genreIds = movie.genreIds {
+                if let existingGenres = entity.genre as? Set<Genre>, !existingGenres.isEmpty {
+                    existingGenres.forEach { entity.removeFromGenre($0) }
+                }
+                for gid in genreIds {
+                    let gf: NSFetchRequest<Genre> = Genre.fetchRequest()
+                    gf.predicate = NSPredicate(format: "id == %d", gid)
+                    gf.fetchLimit = 1
+                    if let found = try? context.fetch(gf).first {
+                        entity.addToGenre(found)
+                    } else {
+                        let newGenre = Genre(context: context)
+                        newGenre.id = Int64(gid)
+                        entity.addToGenre(newGenre)
+                    }
+                }
+            }
+        }
+        
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save watchlist movies: \(error)")
+        }
+    }
+    
+    func loadWatchlistMoviesFromCoreData() -> [MovieBasics] {
+        let context = container.viewContext
+        let fetch: NSFetchRequest<WatchlistMovie> = WatchlistMovie.fetchRequest()
+        fetch.sortDescriptors = [
+            NSSortDescriptor(key: "title", ascending: true),
+            NSSortDescriptor(key: "popularity", ascending: false)
+        ]
+
+        do {
+            let entities = try context.fetch(fetch)
+            return entities.map { e in
+                var basics = MovieBasics()
+                basics.id = Int(e.id)
+                basics.adult = e.adult
+                basics.backdropPath = e.backdropPath
+                basics.originalLanguage = e.originalLanguage
+                basics.originalTitle = e.originalTitle
+                basics.overview = e.overview
+                basics.popularity = e.popularity
+                basics.posterPath = e.posterPath
+                basics.releaseDate = e.releaseDate
+                basics.title = e.title
+                basics.voteAverage = e.voteAverage
+                basics.voteCount = Int(e.voteCount)
+                if let genres = e.genre as? Set<Genre> {
+                    basics.genreIds = genres.map { Int($0.id) }.sorted()
+                }
+                return basics
+            }
+        } catch {
+            print("Failed to load watchlist: \(error)")
+            return []
         }
     }
 }

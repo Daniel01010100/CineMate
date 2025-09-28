@@ -22,6 +22,32 @@ struct MovieBasics: Codable {
     var video: Bool = false
     var voteAverage: Double? = nil
     var voteCount: Int? = nil
+    
+    var posterURL: URL? {
+        if let path = posterPath {
+            return URL(string: "https://image.tmdb.org/t/p/w500\(path)")
+        }
+        return nil
+    }
+    
+    init() {}
+    
+    init(_ details: MovieDetails) {
+        self.id = details.id
+        self.adult = details.adult
+        self.backdropPath = details.backdropPath
+        self.genreIds = details.genres?.map(\.self.id)
+        self.originalLanguage = details.originalLanguage
+        self.originalTitle = details.originalTitle
+        self.overview = details.overview
+        self.popularity = details.popularity
+        self.posterPath = details.posterPath
+        self.releaseDate = details.releaseDate
+        self.title = details.title
+        self.video = details.video
+        self.voteAverage = details.voteAverage
+        self.voteCount = details.voteCount
+    }
 }
 
 struct Dates: Codable {

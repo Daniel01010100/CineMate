@@ -11,16 +11,9 @@ struct MovieCards: View {
     var cmvm: CineMateViewModel
     var movie: MovieBasics
 
-    var posterURL: URL? {
-        if let path = movie.posterPath {
-            return URL(string: "https://image.tmdb.org/t/p/w500\(path)")
-        }
-        return nil
-    }
-
     var body: some View {
         HStack {
-            AsyncImage(url: posterURL) { phase in
+            AsyncImage(url: movie.posterURL) { phase in
                 switch phase {
                 case .empty:
                     ProgressView()

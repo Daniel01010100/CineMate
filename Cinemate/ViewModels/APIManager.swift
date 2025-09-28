@@ -165,7 +165,7 @@ class APIManager : APIManagerProtocol {
         let jsonDecoder = JSONDecoder()
         jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
         let upComingMovies = try jsonDecoder.decode(MovieInfo.self, from: data)
-        
+        print(upComingMovies)
         return upComingMovies
     }
     
