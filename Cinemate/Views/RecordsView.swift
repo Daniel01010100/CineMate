@@ -9,8 +9,79 @@ import SwiftUI
 
 struct RecordsView: View {
     var cmvm: CineMateViewModel
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack(alignment: .leading, spacing: 20) {
+            Button(action: performSearch) {
+                Image(systemName: "note.text.badge.plus")
+            }
+        }
+    }
+    
+}
+
+struct GroupedRecords: View {
+    let title: String
+    let groups: [String: [MovieRecords]]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            ForEach(groups.keys.sorted(), id: \.self) { key in
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(key)
+                        .font(.title3)
+                        .padding(.horizontal)
+                    
+                    ScrollView(.horizontal) {
+                        HStack(spacing: 16) {
+                            ForEach(groups[key]!) { record in
+                                NavigationLink(destination: RecordDetailView(record: record)) {
+                                    RecordCards(record: record)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct RecordCards: View {
+    var record: MovieRecords
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            if let posterPath = record.moviePosterURLSnapshot {
+                AsyncImage(url: URL(string: posterPath)) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView()
+                            .frame(width: 100, height: 150)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 150)
+                    case .failure:
+                        Image(systemName: "photo")
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundColor(.secondary)
+                            .frame(width: 100, height: 150)
+                    @unknown default:
+                        EmptyView()
+                    }
+                }
+            } else {
+                Image(systemName: "photo")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(.secondary)
+                    .frame(width: 100, height: 150)
+            }
+            Text("\(record.movieTitle ?? "")")
+        }
     }
 }
 

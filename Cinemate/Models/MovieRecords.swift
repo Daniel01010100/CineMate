@@ -7,17 +7,35 @@
 
 import Foundation
 
-struct MovieRecords: Identifiable, Codable {
+struct MovieRecords: Codable, Identifiable {
     var id: UUID = UUID()
     var movieId: Int = 0
+    var moviePosterURLSnapshot: String? = nil
+    var movieTitle: String? = nil
     var cinemaId: UUID? = nil
     var dateWatched: Date? = nil
     var viewingFormat: [ViewingFormat] = []
     var userRating: Double? = nil
     var review: String? = nil
+    var companions: [CompanionModel] = []
+    
+    init() {}
+    
+    init(_ movie: MovieBasics, _ cinemaId: UUID? = nil, _ date: Date? = nil, _ format: [ViewingFormat] = [],
+         _ rating: Double? = nil, _ review: String? = nil, _ companions: [CompanionModel] = []) {
+        self.movieId = movie.id
+        self.moviePosterURLSnapshot = movie.posterPath
+        self.movieTitle = movie.title
+        self.cinemaId = cinemaId
+        self.dateWatched = date
+        self.viewingFormat = format
+        self.userRating = rating
+        self.review = review
+        self.companions = companions
+    }
 }
 
-enum ViewingFormat: String, Codable, CaseIterable, Identifiable {
+enum ViewingFormat: String, Codable, CaseIterable, Identifiable, Equatable {
     case standard2D = "2D"
     case threeD = "3D"
     case imax2D = "IMAX 2D"
@@ -29,5 +47,21 @@ enum ViewingFormat: String, Codable, CaseIterable, Identifiable {
     case screenX = "ScreenX"
     
     var id: String { self.rawValue }
+}
+
+struct CompanionModel: Codable, Equatable {
+    var name: String? = nil
+    var relationship: String? = nil
+    var userId: UUID? = nil
+    var isPrimary: Bool = false
+    
+    init() {}
+    
+    init(_ name: String? = nil, _ relationship: String? = nil,_ userId: UUID? = nil, _ isPrimary: Bool = false) {
+        self.name = name
+        self.relationship = relationship
+        self.userId = userId
+        self.isPrimary = isPrimary
+    }
 }
 

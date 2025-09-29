@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct MovieBasics: Codable {
+struct MovieBasics: Codable, Equatable {
     var id: Int = 0
     var adult: Bool = true
     var backdropPath: String? = nil

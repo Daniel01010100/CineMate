@@ -40,6 +40,11 @@ struct RootView: View {
                 .tag(3)
         }
         .tint(cmvm.cinemateColor)
+        .onAppear() {
+            Task {
+                cmvm.loadUserProfile()
+            }
+        }
     }
 }
 

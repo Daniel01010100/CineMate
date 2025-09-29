@@ -17,6 +17,8 @@ final class CineMateViewModel {
     var movies: [MovieBasics] = []
     var watchlistMovies: [MovieBasics] = []
     var movieDetails: MovieDetails? = nil
+    var movieRecords: [MovieRecords] = []
+    var cinemas: [Cinema] = []
     var cinemateColor = Color(red: 30/255, green: 58/255, blue: 138/255)
     private let _persistence = PersistenceController.shared
     
@@ -163,33 +165,65 @@ final class CineMateViewModel {
         }
     }
     
+    func saveUserProfile() {
+        self._persistence.saveUserProfileToCoreData(self.user)
+    }
+    
+    func loadUserProfile() {
+        if let userProfile = self._persistence.loadUserProfileFromCoreData() {
+            self.user = userProfile
+        }
+    }
+    
     func updateUserPreferredLanguage(_ language: Languages) {
         user.preferredLanguage = language
+        self.saveUserProfile()
     }
     
     func updateUserCurrentRegion(_ region: Regions) {
         user.currentRegion = region
+        self.saveUserProfile()
     }
     
     func addMovieToUserWatchlist(_ movie: MovieBasics) {
-        if self.user.watchlist.contains(movie.id) {
-            return
-        }
-        self.user.watchlist.append(movie.id)
         self._persistence.addWatchlistMoviesToCoreData(movie)
     }
     
     func delMovieFromUserWatchlist(_ movie: MovieBasics) -> Bool {
-        if self.user.watchlist.firstIndex(of: movie.id) == nil {
-            return false
-        }
-        self.user.watchlist.removeAll { $0 == movie.id }
-        self._persistence.deleteMovieFromWatchlist(movie.id)
-        return true
+       return self._persistence.deleteMovieFromWatchlist(movie.id)
     }
     
     func getWatchlistMovies() -> [MovieBasics] {
         return self._persistence.loadWatchlistMoviesFromCoreData()
+    }
+    
+    func addMovieRecord(movie: MovieBasics, cinemaId: UUID? = nil, date: Date? = nil, format: [ViewingFormat] = [],
+                        rating: Double? = nil, review: String? = nil, companions: [CompanionModel] = []) {
+        let newRecord = MovieRecords(movie, cinemaId, date, format, rating, review, companions)
+        self.movieRecords.append(newRecord)
+        self._persistence.addMovieRecordToCoreData(newRecord)
+    }
+    
+    func delMovieRecord(_ recordId: UUID) -> Bool {
+        self.movieRecords.removeAll { $0.id == recordId }
+        return self._persistence.deleteMovieRecordFromCoreData(recordId)
+    }
+    
+    func saveMovieRecords() {
+        self._persistence.saveMovieRecordsToCoreData(self.movieRecords)
+    }
+    
+    func loadMovieRecords() {
+        self.movieRecords = self._persistence.loadMovieRecordsFromCoreData()
+    }
+    
+    func getCinemaNameById(_ cinemaId: UUID) -> String {
+        for cinema in cinemas {
+            if cinema.id == cinemaId {
+                return cinema.name
+            }
+        }
+        return ""
     }
 }
 

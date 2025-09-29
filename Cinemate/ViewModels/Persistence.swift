@@ -51,6 +51,12 @@ struct PersistenceController {
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
     }
     
+    /**
+     Save the fetched data of "Now Playing" movies into Core Data
+     
+     - Parameters
+        movies - An array that stores all now playing movies.
+     */
     func saveNowPlayingMoviesToCoreData(_ movies: [MovieBasics]) {
         let context = container.viewContext
 
@@ -65,7 +71,7 @@ struct PersistenceController {
                  NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [context])
              }
          } catch {
-             print("Failed to clear existing movies: \(error)")
+             print("Failed to clear existing movies in Core Data: \(error)")
          }
 
         // Save new movies
@@ -84,6 +90,7 @@ struct PersistenceController {
             entity.voteAverage = movie.voteAverage ?? 0.0
             entity.voteCount = Int64(movie.voteCount ?? 0)
             
+            // Convert the array of genre id to the relationship genre
             if let genreIds = movie.genreIds {
                 for gid in genreIds {
                     let fetch: NSFetchRequest<Genre> = Genre.fetchRequest()
@@ -100,14 +107,20 @@ struct PersistenceController {
                 }
             }
         }
-
+        // Save data to the Core Data
         do {
             try context.save()
         } catch {
-            print("Failed to save now playing movies: \(error)")
+            print("Failed to save now playing movies to Core Data: \(error)")
         }
     }
     
+    /**
+     Load the data of "Now Playing" movies from the Core Data
+     
+     - Returns
+        [MovieBasics]
+     */
     func loadNowPlayingMoviesFromCoreData() throws -> [MovieBasics] {
         let context = container.viewContext
         let fetchRequest: NSFetchRequest<NowPlayingMovie> = NowPlayingMovie.fetchRequest()
@@ -133,6 +146,7 @@ struct PersistenceController {
                 basics.voteAverage = entity.voteAverage
                 basics.voteCount = Int(entity.voteCount)
                 
+                // Convert the genre relationship to an array that stores genre id.
                 if let genres = entity.genre as? Set<Genre> {
                     basics.genreIds = genres.map { Int($0.id) }.sorted()
                 }
@@ -144,6 +158,7 @@ struct PersistenceController {
         }
     }
     
+
     func addWatchlistMoviesToCoreData(_ movie: MovieBasics) {
         let context = container.viewContext
 
@@ -172,13 +187,12 @@ struct PersistenceController {
         entity.voteAverage = movie.voteAverage ?? 0.0
         entity.voteCount = Int64(movie.voteCount ?? 0)
 
-        // Sync genres (optional)
         if let genreIds = movie.genreIds {
-            // Clear existing
+            // Clear existing data
             if let existingGenres = entity.genre as? Set<Genre>, !existingGenres.isEmpty {
                 existingGenres.forEach { entity.removeFromGenre($0) }
             }
-            // Attach from ids
+
             for gid in genreIds {
                 let gf: NSFetchRequest<Genre> = Genre.fetchRequest()
                 gf.predicate = NSPredicate(format: "id == %d", gid)
@@ -196,11 +210,11 @@ struct PersistenceController {
         do {
             try context.save()
         } catch {
-            print("Failed to save watchlist movie: \(error)")
+            print("Failed to save watchlist movie to Core Data: \(error)")
         }
     }
 
-    func deleteMovieFromWatchlist(_ id: Int) {
+    func deleteMovieFromWatchlist(_ id: Int) -> Bool {
         let context = container.viewContext
         let fetch: NSFetchRequest<WatchlistMovie> = WatchlistMovie.fetchRequest()
         fetch.predicate = NSPredicate(format: "id == %d", id)
@@ -212,10 +226,18 @@ struct PersistenceController {
                 try context.save()
             }
         } catch {
-            print("Failed to delete watchlist movie: \(error)")
+            print("Failed to delete watchlist movie from Core Data: \(error)")
+            return false
         }
+        return true
     }
     
+    /**
+     Save the data of movies in the watchinglist into the Core Data
+     
+     - Parameters
+        movies - An array that stores all now playing movies.
+     */
     func saveWatchlistMoviesToCoreData(_ movies: [MovieBasics]) {
         let context = container.viewContext
         
@@ -268,7 +290,7 @@ struct PersistenceController {
         do {
             try context.save()
         } catch {
-            print("Failed to save watchlist movies: \(error)")
+            print("Failed to save watchlist movies to Core Data: \(error)")
         }
     }
     
@@ -276,8 +298,7 @@ struct PersistenceController {
         let context = container.viewContext
         let fetch: NSFetchRequest<WatchlistMovie> = WatchlistMovie.fetchRequest()
         fetch.sortDescriptors = [
-            NSSortDescriptor(key: "title", ascending: true),
-            NSSortDescriptor(key: "popularity", ascending: false)
+            NSSortDescriptor(key: "title", ascending: true)
         ]
 
         do {
@@ -302,8 +323,183 @@ struct PersistenceController {
                 return basics
             }
         } catch {
-            print("Failed to load watchlist: \(error)")
+            print("Failed to load watchlist from Core Data: \(error)")
             return []
         }
+    }
+    
+    func addMovieRecordToCoreData(_ movieRecord: MovieRecords) {
+        let context = container.viewContext
+
+        let fetch: NSFetchRequest<Record> = Record.fetchRequest()
+        fetch.predicate = NSPredicate(format: "id == %@", movieRecord.id as CVarArg)
+        fetch.fetchLimit = 1
+
+        let entity: Record
+        if let existing = try? context.fetch(fetch).first {
+            entity = existing
+        } else {
+            entity = Record(context: context)
+            entity.id = movieRecord.id
+        }
+
+        // Update attributes fields
+        entity.id = movieRecord.id
+        entity.movieId = Int64(movieRecord.movieId)
+        entity.moviePosterURLSnapshot = movieRecord.moviePosterURLSnapshot
+        entity.movieTitle = movieRecord.movieTitle
+        entity.cinemaId = movieRecord.cinemaId
+        entity.dateWatched = movieRecord.dateWatched
+        entity.viewingFormat = movieRecord.viewingFormat.map { $0.rawValue }.joined(separator: ",")
+        entity.userRating = movieRecord.userRating ?? 0.0
+        entity.review = movieRecord.review
+
+        // Save context
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save record to Core Data: \(error)")
+        }
+    }
+    
+    func deleteMovieRecordFromCoreData(_ recordId: UUID) -> Bool {
+        let context = container.viewContext
+        let fetch: NSFetchRequest<Record> = Record.fetchRequest()
+        fetch.predicate = NSPredicate(format: "id == %@", recordId as CVarArg)
+        fetch.fetchLimit = 1
+
+        do {
+            if let target = try context.fetch(fetch).first {
+                context.delete(target)
+                try context.save()
+            }
+        } catch {
+            print("Failed to delete record from Core Data: \(error)")
+            return false
+        }
+        return true
+    }
+    
+    func saveMovieRecordsToCoreData(_ movieRecords: [MovieRecords]) {
+        let context = container.viewContext
+        
+        for movieRecord in movieRecords {
+            let fetch: NSFetchRequest<Record> = Record.fetchRequest()
+            fetch.predicate = NSPredicate(format: "id == %@", movieRecord.id as CVarArg)
+            fetch.fetchLimit = 1
+            
+            let entity: Record
+            if let existing = try? context.fetch(fetch).first {
+                entity = existing
+            } else {
+                entity = Record(context: context)
+                entity.id = movieRecord.id
+            }
+            
+            entity.id = movieRecord.id
+            entity.movieId = Int64(movieRecord.movieId)
+            entity.moviePosterURLSnapshot = movieRecord.moviePosterURLSnapshot
+            entity.movieTitle = movieRecord.movieTitle
+            entity.cinemaId = movieRecord.cinemaId
+            entity.dateWatched = movieRecord.dateWatched
+            entity.viewingFormat = movieRecord.viewingFormat.map { $0.rawValue }.joined(separator: ",")
+            entity.userRating = movieRecord.userRating ?? 0.0
+            entity.review = movieRecord.review
+
+            // Clear existing companions if any
+            if let existingCompanions = entity.companions as? Set<Companion> {
+                for c in existingCompanions {
+                    context.delete(c)
+                }
+            }
+
+            // Add new companions
+            for companion in movieRecord.companions {
+                let c = Companion(context: context)
+                c.name = companion.name
+                c.relationship = companion.relationship
+                c.userId = companion.userId
+                c.isPrimary = companion.isPrimary
+                entity.addToCompanions(c)
+            }
+        }
+        
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save movie records to Core Data: \(error)")
+        }
+    }
+    
+    func loadMovieRecordsFromCoreData() -> [MovieRecords] {
+        let context = container.viewContext
+        let fetch: NSFetchRequest<Record> = Record.fetchRequest()
+        fetch.sortDescriptors = [NSSortDescriptor(key: "dateWatched", ascending: true)]
+        
+        do {
+            let entities = try context.fetch(fetch)
+            return entities.map{ e in
+                var records = MovieRecords()
+                records.id = e.id!
+                records.movieId = Int(e.movieId)
+                records.moviePosterURLSnapshot = e.moviePosterURLSnapshot
+                records.movieTitle = e.movieTitle
+                records.cinemaId = e.cinemaId
+                records.dateWatched = e.dateWatched!
+                records.viewingFormat = e.viewingFormat?.split(separator: ",").compactMap { ViewingFormat(rawValue: String($0)) } ?? []
+                records.userRating = e.userRating
+                records.review = e.review
+                if let companionSet = e.companions as? Set<Companion> {
+                    records.companions = companionSet.map { c in
+                        CompanionModel(c.name, c.relationship, c.userId, c.isPrimary)
+                    }
+                }
+                return records
+            }
+        } catch {
+            print("Failed to load watchlist from Core Data: \(error)")
+            return []
+        }
+    }
+    
+    func saveUserProfileToCoreData(_ userProfile: UserProfile) {
+        let context = container.viewContext
+        let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
+        fetchRequest.fetchLimit = 1
+        
+        let user: User
+        if let fetchedUser = try? context.fetch(fetchRequest).first {
+            user = fetchedUser
+        } else {
+            user = User(context: context)
+            user.id = UUID()
+        }
+        
+        user.currentRegion = userProfile.currentRegion.rawValue
+        user.preferredLanguage = userProfile.preferredLanguage.rawValue
+        
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save user profile to Core Data: \(error)")
+        }
+    }
+    
+    func loadUserProfileFromCoreData() -> UserProfile? {
+        let context = container.viewContext
+        let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
+        fetchRequest.fetchLimit = 1
+                
+        do {
+            if let fetchedUser = try context.fetch(fetchRequest).first {
+                var userProfile = UserProfile()
+                userProfile.currentRegion = Regions(rawValue: fetchedUser.currentRegion ?? "AU") ?? .Australia
+                userProfile.preferredLanguage = Languages(rawValue: fetchedUser.preferredLanguage ?? "en") ?? .English
+                return userProfile
+            }
+        } catch {
+            print("Failed to load user profile from Core Data: \(error)")
+        }
+        return nil
     }
 }
