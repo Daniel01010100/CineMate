@@ -475,6 +475,7 @@ struct PersistenceController {
             user.id = UUID()
         }
         
+        user.username = userProfile.username
         user.currentRegion = userProfile.currentRegion.rawValue
         user.preferredLanguage = userProfile.preferredLanguage.rawValue
         
@@ -493,6 +494,7 @@ struct PersistenceController {
         do {
             if let fetchedUser = try context.fetch(fetchRequest).first {
                 var userProfile = UserProfile()
+                userProfile.username = fetchedUser.username ?? ""
                 userProfile.currentRegion = Regions(rawValue: fetchedUser.currentRegion ?? "AU") ?? .Australia
                 userProfile.preferredLanguage = Languages(rawValue: fetchedUser.preferredLanguage ?? "en") ?? .English
                 return userProfile

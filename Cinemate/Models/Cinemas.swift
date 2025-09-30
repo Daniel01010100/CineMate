@@ -8,14 +8,14 @@
 import Foundation
 import CoreLocation
 
-struct Cinema: Codable {
+struct CinemaModel: Codable, Identifiable, Hashable {
     var id: UUID = UUID()
     var name: String = ""
     var address: String? = nil
     var coordinates: Coordinates? = nil
 }
 
-struct Coordinates: Codable {
+struct Coordinates: Codable, Hashable {
     var latitude: Double
     var longitude: Double
     

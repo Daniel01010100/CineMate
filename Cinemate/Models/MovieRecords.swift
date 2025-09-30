@@ -21,11 +21,11 @@ struct MovieRecords: Codable, Identifiable {
     
     init() {}
     
-    init(_ movie: MovieBasics, _ cinemaId: UUID? = nil, _ date: Date? = nil, _ format: [ViewingFormat] = [],
-         _ rating: Double? = nil, _ review: String? = nil, _ companions: [CompanionModel] = []) {
-        self.movieId = movie.id
-        self.moviePosterURLSnapshot = movie.posterPath
-        self.movieTitle = movie.title
+    init(_ movieId: Int, _ posterPath: String? = nil, _ title: String? = nil, _ cinemaId: UUID? = nil, _ date: Date? = nil,
+         _ format: [ViewingFormat] = [], _ rating: Double? = nil, _ review: String? = nil, _ companions: [CompanionModel] = []) {
+        self.movieId = movieId
+        self.moviePosterURLSnapshot = posterPath
+        self.movieTitle = title
         self.cinemaId = cinemaId
         self.dateWatched = date
         self.viewingFormat = format
@@ -41,8 +41,6 @@ enum ViewingFormat: String, Codable, CaseIterable, Identifiable, Equatable {
     case imax2D = "IMAX 2D"
     case imax3D = "IMAX 3D"
     case dolbyCinema = "Dolby Cinema"
-    case dolbyVision = "Dolby Vision"
-    case dolbyAtmos = "Dolby Atmos"
     case fourDX = "4DX"
     case screenX = "ScreenX"
     

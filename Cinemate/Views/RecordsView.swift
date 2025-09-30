@@ -12,12 +12,13 @@ struct RecordsView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Button(action: performSearch) {
-                Image(systemName: "note.text.badge.plus")
-            }
+
         }
     }
     
+    private func performAddNewRecord() {
+        
+    }
 }
 
 struct GroupedRecords: View {

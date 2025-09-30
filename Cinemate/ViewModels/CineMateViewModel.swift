@@ -13,13 +13,15 @@ import Observation
 final class CineMateViewModel {
     var user: UserProfile = .init()
     var apiManager: APIManager = .init()
+    var cinemaSearchManager: CinemaSearchManager = .init()
     var currentMode: MovieListMode = .nowPlaying
     var movies: [MovieBasics] = []
     var watchlistMovies: [MovieBasics] = []
     var movieDetails: MovieDetails? = nil
     var movieRecords: [MovieRecords] = []
-    var cinemas: [Cinema] = []
+    var cinemas: [CinemaModel] = []
     var cinemateColor = Color(red: 30/255, green: 58/255, blue: 138/255)
+    
     private let _persistence = PersistenceController.shared
     
     /**
@@ -197,9 +199,10 @@ final class CineMateViewModel {
         return self._persistence.loadWatchlistMoviesFromCoreData()
     }
     
-    func addMovieRecord(movie: MovieBasics, cinemaId: UUID? = nil, date: Date? = nil, format: [ViewingFormat] = [],
-                        rating: Double? = nil, review: String? = nil, companions: [CompanionModel] = []) {
-        let newRecord = MovieRecords(movie, cinemaId, date, format, rating, review, companions)
+    func addMovieRecord(_ movieId: Int, _ posterPath: String? = nil, _ title: String? = nil, _ cinemaId: UUID? = nil,
+                        _ date: Date? = nil, _ format: [ViewingFormat] = [], _ rating: Double? = nil, _ review: String? = nil,
+                        _ companions: [CompanionModel] = []) {
+        let newRecord = MovieRecords(movieId, posterPath, title, cinemaId, date, format, rating, review, companions)
         self.movieRecords.append(newRecord)
         self._persistence.addMovieRecordToCoreData(newRecord)
     }

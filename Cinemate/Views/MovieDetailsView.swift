@@ -12,6 +12,7 @@ struct MovieDetailsView: View {
     var language: Languages
     var cmvm: CineMateViewModel
     @State private var details: MovieDetails? = nil
+    @State private var _addToRecord: Bool = false
     
     var body: some View {
         ScrollView {
@@ -39,7 +40,7 @@ struct MovieDetailsView: View {
                 }
                 
                 Text(detail.title ?? "Unknown title")
-                    .font(.largeTitle)
+                    .font(.title)
                     .bold()
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
@@ -77,10 +78,11 @@ struct MovieDetailsView: View {
                 Divider()
                     .padding(.vertical)
                 
-                HStack(spacing: 20) {
+                VStack(spacing: 15) {
                     if let homepage = detail.homepage,
                        let url = URL(string: homepage) {
                         Link("Jump to homepage", destination: url)
+                            .frame(width: 180, height: 30)
                             .buttonStyle(.borderedProminent)
                             .tint(cmvm.cinemateColor)
                     }
@@ -88,9 +90,23 @@ struct MovieDetailsView: View {
                     if let imdbId = detail.imdbId,
                        let url = URL(string: "https://www.imdb.com/title/\(imdbId)/") {
                         Link("Jump to IMDb", destination: url)
+                            .frame(width: 180, height: 30)
                             .buttonStyle(.borderedProminent)
                             .tint(cmvm.cinemateColor)
                     }
+                    
+                    NavigationLink {
+                        SetNewRecordView(
+                            cmvm: cmvm,
+                            movieId: detail.id,
+                            posterPath: detail.posterPath ?? "",
+                            title: detail.title ?? "")
+                    } label: {
+                        Text("Add to records")
+                    }
+                    .frame(width: 180, height: 30)
+                    .buttonStyle(.borderedProminent)
+                    .tint(cmvm.cinemateColor)
                 }
                 .padding(.horizontal)
                 
@@ -107,6 +123,11 @@ struct MovieDetailsView: View {
             Task {
                 await self.cmvm.getMovieDetails(self.movieId, self.language)
                 details = self.cmvm.movieDetails
+            }
+        }
+        .sheet(isPresented: $_addToRecord) {
+            VStack(alignment: .leading, spacing: 10) {
+                
             }
         }
     }

@@ -150,7 +150,6 @@ struct MoviesView: View {
                 }
             }
         }
-        .navigationTitle("Cinemate")
         .onAppear {
             Task {
                 await cmvm.loadMoviesDataIfNeeded()
