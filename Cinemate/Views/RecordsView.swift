@@ -27,23 +27,7 @@ struct GroupedRecords: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            ForEach(groups.keys.sorted(), id: \.self) { key in
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(key)
-                        .font(.title3)
-                        .padding(.horizontal)
-                    
-                    ScrollView(.horizontal) {
-                        HStack(spacing: 16) {
-                            ForEach(groups[key]!) { record in
-                                NavigationLink(destination: RecordDetailView(record: record)) {
-                                    RecordCards(record: record)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            Text("Hello, World!")
         }
     }
 }

@@ -177,6 +177,12 @@ final class CineMateViewModel {
         }
     }
     
+    func updateUserProfileAvatar(_ image: UIImage) {
+        if let data = image.jpegData(compressionQuality: 0.8) {
+            self.user.avatar = data
+        }
+    }
+    
     func updateUserPreferredLanguage(_ language: Languages) {
         user.preferredLanguage = language
         self.saveUserProfile()
@@ -220,13 +226,22 @@ final class CineMateViewModel {
         self.movieRecords = self._persistence.loadMovieRecordsFromCoreData()
     }
     
-    func getCinemaNameById(_ cinemaId: UUID) -> String {
+    func addCinema(_ cinema: CinemaModel) {
+        if !self.cinemas.contains(where: { $0.id == cinema.id }) {
+            self.cinemas.append(cinema)
+        }
+    }
+    
+    func getCinemaById(_ cinemaId: UUID?) -> CinemaModel? {
+        guard let cId = cinemaId else {
+            return nil
+        }
         for cinema in cinemas {
-            if cinema.id == cinemaId {
-                return cinema.name
+            if cinema.id == cId {
+                return cinema
             }
         }
-        return ""
+        return nil
     }
 }
 

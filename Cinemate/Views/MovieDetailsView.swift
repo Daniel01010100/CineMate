@@ -39,6 +39,7 @@ struct MovieDetailsView: View {
                     }
                 }
                 
+                // Title of the movie
                 Text(detail.title ?? "Unknown title")
                     .font(.title)
                     .bold()
@@ -79,6 +80,7 @@ struct MovieDetailsView: View {
                     .padding(.vertical)
                 
                 VStack(spacing: 15) {
+                    // Jump to official website, provided by TMDB API.
                     if let homepage = detail.homepage,
                        let url = URL(string: homepage) {
                         Link("Jump to homepage", destination: url)
@@ -87,6 +89,7 @@ struct MovieDetailsView: View {
                             .tint(cmvm.cinemateColor)
                     }
                     
+                    // Jump to imdb website, also provided by TMDB API.
                     if let imdbId = detail.imdbId,
                        let url = URL(string: "https://www.imdb.com/title/\(imdbId)/") {
                         Link("Jump to IMDb", destination: url)
@@ -95,8 +98,9 @@ struct MovieDetailsView: View {
                             .tint(cmvm.cinemateColor)
                     }
                     
+                    // Jump to record creating view.
                     NavigationLink {
-                        SetNewRecordView(
+                        RecordDetailView(
                             cmvm: cmvm,
                             movieId: detail.id,
                             posterPath: detail.posterPath ?? "",

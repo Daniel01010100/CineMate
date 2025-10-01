@@ -47,7 +47,7 @@ enum ViewingFormat: String, Codable, CaseIterable, Identifiable, Equatable {
     var id: String { self.rawValue }
 }
 
-struct CompanionModel: Codable, Equatable {
+struct CompanionModel: Codable, Equatable, Hashable {
     var name: String? = nil
     var relationship: String? = nil
     var userId: UUID? = nil

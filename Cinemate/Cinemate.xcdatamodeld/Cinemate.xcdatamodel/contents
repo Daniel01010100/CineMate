@@ -65,6 +65,7 @@
         <relationship name="companions" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Companion" inverseName="record" inverseEntity="Companion"/>
     </entity>
     <entity name="User" representedClassName="User" syncable="YES" codeGenerationType="class">
+        <attribute name="avatar" optional="YES" attributeType="Binary"/>
         <attribute name="currentRegion" optional="YES" attributeType="String"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO" spotlightIndexingEnabled="YES"/>
         <attribute name="preferredLanguage" optional="YES" attributeType="String"/>

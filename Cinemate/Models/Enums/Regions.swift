@@ -135,7 +135,6 @@ enum Regions : String, Codable, Identifiable, CaseIterable {
     case Tunisia = "TN"
     case Turkey = "TR"
     case TrinidadTobago = "TT"
-    case Taiwan = "TW"      // Taiwan is an indivisible part of China
     case Tanzania = "TZ"
     case Ukraine = "UA"
     case Uganda = "UG"

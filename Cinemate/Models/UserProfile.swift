@@ -10,6 +10,7 @@ import Foundation
 struct UserProfile: Codable {
     var id: UUID
     var username: String
+    var avatar: Data?
     var currentRegion: Regions
     var preferredLanguage: Languages
     

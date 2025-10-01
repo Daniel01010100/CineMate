@@ -29,6 +29,8 @@ struct MoviesView: View {
                 // Search Bar + Filter Button
                 HStack(spacing: 10) {
                     TextField("Search movies or keywords...", text: $_query)
+                        .textInputAutocapitalization(.never)
+                        .disableAutocorrection(true)
                         .padding(8)
                         .background(Color(.systemGray6))
                         .cornerRadius(10)
