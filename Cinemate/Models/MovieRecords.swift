@@ -12,6 +12,7 @@ struct MovieRecords: Codable, Identifiable {
     var movieId: Int = 0
     var moviePosterURLSnapshot: String? = nil
     var movieTitle: String? = nil
+    var movieGenres: [Genres] = []
     var cinemaId: UUID? = nil
     var dateWatched: Date? = nil
     var viewingFormat: [ViewingFormat] = []
@@ -21,11 +22,12 @@ struct MovieRecords: Codable, Identifiable {
     
     init() {}
     
-    init(_ movieId: Int, _ posterPath: String? = nil, _ title: String? = nil, _ cinemaId: UUID? = nil, _ date: Date? = nil,
-         _ format: [ViewingFormat] = [], _ rating: Double? = nil, _ review: String? = nil, _ companions: [CompanionModel] = []) {
+    init(_ movieId: Int, _ posterPath: String? = nil, _ title: String? = nil, _ movieGenres: [Genres], _ cinemaId: UUID? = nil,
+         _ date: Date? = nil, _ format: [ViewingFormat] = [], _ rating: Double? = nil, _ review: String? = nil, _ companions: [CompanionModel] = []) {
         self.movieId = movieId
         self.moviePosterURLSnapshot = posterPath
         self.movieTitle = title
+        self.movieGenres = movieGenres
         self.cinemaId = cinemaId
         self.dateWatched = date
         self.viewingFormat = format

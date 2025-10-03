@@ -9,7 +9,7 @@ import SwiftUI
 
 struct RootView: View {
     var cmvm: CineMateViewModel
-    @State private var defaultTab: Int = 0
+    @State private var defaultTab: Int = 2
     
     var body: some View {
         TabView(selection: $defaultTab) {

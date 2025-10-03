@@ -17,6 +17,8 @@ struct NearbyCinemaView: View {
     var body: some View {
         VStack {
             TextField("Search cinemas", text: $_keyword)
+                .textInputAutocapitalization(.never)
+                .disableAutocorrection(true)
                 .textFieldStyle(.roundedBorder)
                 .padding()
                 .onChange(of: _keyword) {
@@ -63,7 +65,9 @@ struct NearbyCinemaView: View {
             }
             
             Button {
-                showingMap = false
+                self.showingMap = false
+                self._keyword = ""
+                cmvm.cinemaSearchManager.clearSearchResults()
             } label: {
                 Text(selectedCinema == nil ? "Dismiss" : "Confirm")
                     .font(.headline)

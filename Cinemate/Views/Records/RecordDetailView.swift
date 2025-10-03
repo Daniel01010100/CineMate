@@ -13,6 +13,7 @@ struct RecordDetailView: View {
     var movieId: Int    // The id of the chosen movie
     var posterPath: String  // The poster's path of the chosen movie
     var title: String   // The title of the chosen movie
+    var genres: [Genres] = []
     var isEditing: Bool = false    // Used for
     @Environment(\.dismiss) private var _dismiss
     @State private var _showingMap: Bool = false
@@ -26,12 +27,13 @@ struct RecordDetailView: View {
     @State private var _relationship: String = ""
     
     // For creating new record.
-    init(cmvm: CineMateViewModel, movieId: Int, posterPath: String, title: String) {
+    init(cmvm: CineMateViewModel, movieId: Int, posterPath: String, title: String, genres: [Genres]) {
         self.isEditing = false
         self.cmvm = cmvm
         self.movieId = movieId
         self.posterPath = posterPath
         self.title = title
+        self.genres = genres
     }
     
     // For editing the record already exists.
@@ -40,6 +42,7 @@ struct RecordDetailView: View {
         self.cmvm = cmvm
         self.movieId = record.movieId
         self.posterPath = record.moviePosterURLSnapshot ?? ""
+        self.genres = record.movieGenres
         self.title = record.movieTitle ?? ""
         self._cinema = cmvm.getCinemaById(record.cinemaId)
         self._date = record.dateWatched ?? Date()
@@ -68,7 +71,7 @@ struct RecordDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "map")
                             // If the user has chosen a cinema, the name of cinema will be directly indicated outside the sheet.
-                            Text(_cinema == nil ? "Select" : "Choosed Cinema: ")
+                            Text(_cinema == nil ? "Select" : "Selected Cinema: ")
                             if let cinema = _cinema {
                                 Text("\(cinema.name)")
                             }
@@ -159,9 +162,7 @@ struct RecordDetailView: View {
             
             // Save records to Core Data.
             Button(action: {
-                let companion = CompanionModel(_name, _relationship)
-                _companions.append(companion)
-                cmvm.addMovieRecord(movieId, posterPath, title, _cinema?.id, _date, [_format], Double(_rating), _review, _companions)
+                cmvm.addMovieRecord(movieId, posterPath, title, genres, _cinema?.id, _date, [_format], Double(_rating), _review, _companions)
                 if let cinema = self._cinema {
                     cmvm.addCinema(cinema)
                 }
@@ -234,6 +235,7 @@ struct CompanionView: View {
                         self.addCompanion()
                         self._name = ""
                         self._relationship = ""
+                        print(_companions.count)
                         self._isAddingCompanion = false
                     }
                 }
@@ -250,11 +252,14 @@ struct CompanionView: View {
     }
     
     private func addCompanion() {
+        if _name == "" {
+            return
+        }
         let companion = CompanionModel(_name, _relationship)
         self._companions.append(companion)
     }
 }
 
 #Preview {
-    RecordDetailView(cmvm: .init(), movieId: 0, posterPath: "", title: "")
+    RecordDetailView(cmvm: .init(), movieId: 0, posterPath: "", title: "", genres: [])
 }

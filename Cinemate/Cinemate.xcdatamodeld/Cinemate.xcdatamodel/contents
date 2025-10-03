@@ -31,6 +31,7 @@
         <attribute name="name" optional="YES" attributeType="String"/>
         <relationship name="favouriteMovies" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="FavouriteMovie" inverseName="genre" inverseEntity="FavouriteMovie"/>
         <relationship name="nowPlayingMovies" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="NowPlayingMovie" inverseName="genre" inverseEntity="NowPlayingMovie"/>
+        <relationship name="record" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Record" inverseName="movieGenres" inverseEntity="Record"/>
         <relationship name="watchlistMovies" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="WatchlistMovie" inverseName="genre" inverseEntity="WatchlistMovie"/>
     </entity>
     <entity name="NowPlayingMovie" representedClassName="NowPlayingMovie" syncable="YES" codeGenerationType="class">
@@ -63,6 +64,7 @@
         <attribute name="userRating" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="viewingFormat" optional="YES" attributeType="String"/>
         <relationship name="companions" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Companion" inverseName="record" inverseEntity="Companion"/>
+        <relationship name="movieGenres" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Genre" inverseName="record" inverseEntity="Genre"/>
     </entity>
     <entity name="User" representedClassName="User" syncable="YES" codeGenerationType="class">
         <attribute name="avatar" optional="YES" attributeType="Binary"/>

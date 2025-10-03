@@ -177,6 +177,11 @@ final class CineMateViewModel {
         }
     }
     
+    func updateUsername(_ username: String) {
+        user.username = username
+        self.saveUserProfile()
+    }
+    
     func updateUserProfileAvatar(_ image: UIImage) {
         if let data = image.jpegData(compressionQuality: 0.8) {
             self.user.avatar = data
@@ -205,10 +210,12 @@ final class CineMateViewModel {
         return self._persistence.loadWatchlistMoviesFromCoreData()
     }
     
-    func addMovieRecord(_ movieId: Int, _ posterPath: String? = nil, _ title: String? = nil, _ cinemaId: UUID? = nil,
-                        _ date: Date? = nil, _ format: [ViewingFormat] = [], _ rating: Double? = nil, _ review: String? = nil,
-                        _ companions: [CompanionModel] = []) {
-        let newRecord = MovieRecords(movieId, posterPath, title, cinemaId, date, format, rating, review, companions)
+    func addMovieRecord(_ movieId: Int, _ posterPath: String? = nil, _ title: String? = nil,
+                        _ genres: [Genres] = [], _ cinemaId: UUID? = nil,
+                        _ date: Date? = nil, _ format: [ViewingFormat] = [], _ rating: Double? = nil,
+                        _ review: String? = nil, _ companions: [CompanionModel] = []) {
+        let newRecord = MovieRecords(movieId, posterPath, title, genres, cinemaId,
+                                     date, format, rating, review, companions)
         self.movieRecords.append(newRecord)
         self._persistence.addMovieRecordToCoreData(newRecord)
     }
@@ -232,6 +239,12 @@ final class CineMateViewModel {
         }
     }
     
+    /**
+     Get cinema model based on the cinema's id
+     
+     - Parameters:
+        cinemaId: UUID?
+     */
     func getCinemaById(_ cinemaId: UUID?) -> CinemaModel? {
         guard let cId = cinemaId else {
             return nil
@@ -242,6 +255,46 @@ final class CineMateViewModel {
             }
         }
         return nil
+    }
+    
+    /**
+     Get the date when user wathced most movies
+     
+     - Returns:
+        String? A string that contains month and years components in the format of MM-yyyy
+     */
+    func getMostWatchedDate() -> String? {
+        let calendar = Calendar.current
+        var monthCounts: [String: Int] = [:]
+        
+        for record in self.movieRecords {
+            if let date = record.dateWatched {
+                let components = calendar.dateComponents([.year, .month], from: date)
+                if let year = components.year, let month = components.month {
+                    let key = String(format: "%02d/%04d", month, year)
+                    monthCounts[key, default: 0] += 1
+                }
+            }
+        }
+        return monthCounts.max{ $0.value < $1.value }?.key
+    }
+    
+    /**
+     Get data of the companion who watched the most movies with user
+     
+     - Returns:
+        String? A string that includs the companion's name
+     */
+    func getMostFrequentCompanion() -> String? {
+        var companionCounts: [String: Int] = [:]
+        
+        for record in movieRecords {
+            for companion in record.companions {
+                let key = companion.name ?? ""
+                companionCounts[key, default: 0] += 1
+            }
+        }
+        return companionCounts.max{ $0.value < $1.value }?.key
     }
 }
 

@@ -7,11 +7,6 @@
 
 import Foundation
 
-struct Genres: Codable {
-    var id: Int = 0
-    var name: String? = nil
-}
-
 struct ProductionCompany: Codable {
     var id: Int = 0
     var logo_path: String? = nil

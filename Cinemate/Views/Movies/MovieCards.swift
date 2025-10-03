@@ -23,6 +23,7 @@ struct MovieCards: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 100, height: 150)
+                        .cornerRadius(10)
                 case .failure:
                     Image(systemName: "photo")
                         .resizable()
@@ -33,6 +34,7 @@ struct MovieCards: View {
                     EmptyView()
                 }
             }
+            
             VStack(alignment: .leading) {
                 Text(movie.title ?? "")
                     .bold()

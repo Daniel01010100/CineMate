@@ -406,12 +406,20 @@ struct PersistenceController {
             entity.userRating = movieRecord.userRating ?? 0.0
             entity.review = movieRecord.review
 
-            // Clear existing companions if any
+            // Clear existing companions if exists
             if let existingCompanions = entity.companions as? Set<Companion> {
                 for c in existingCompanions {
                     context.delete(c)
                 }
             }
+            
+            let genreEntities: Set<Genre> = Set(movieRecord.movieGenres.map { genre in
+                let genreEntity = Genre(context: context)
+                genreEntity.id = Int64(genre.id)
+                genreEntity.name = genre.name
+                return genreEntity
+            })
+            entity.movieGenres = genreEntities as NSSet
 
             // Add new companions
             for companion in movieRecord.companions {
@@ -453,6 +461,12 @@ struct PersistenceController {
                     records.companions = companionSet.map { c in
                         CompanionModel(c.name, c.relationship, c.userId, c.isPrimary)
                     }
+                }
+                
+                if let genreSet = e.movieGenres as? Set<Genre> {
+                    records.movieGenres = genreSet.map { genre in
+                        Genres(id: Int(genre.id), name: genre.name ?? "")
+                    }.sorted(by: { $0.id < $1.id })
                 }
                 return records
             }

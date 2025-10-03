@@ -50,28 +50,36 @@ struct MovieDetailsView: View {
                 Divider()
                     .padding(.vertical)
                 
-                Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
-                    GridRow {
-                        Text("Rating: \(detail.voteAverage ?? 0.0, specifier: "%.1f")")
-                        Text("Release date: \(detail.releaseDate ?? "Unknown")")
+                VStack(alignment: .leading) {
+                    Text("Rating: \(detail.voteAverage ?? 0.0, specifier: "%.1f")")
+                        .font(.headline)
+                        .bold()
+                    
+                    Text("Release date: \(detail.releaseDate ?? "Unknown")")
+                        .font(.headline)
+                        .bold()
+                    
+                    if let duration = detail.runtime {
+                        let hours = duration / 60
+                        let minutes = duration % 60
+                        Text("Duration: \(hours) h \(minutes) mins")
+                            .font(.headline)
+                            .bold()
+                    } else {
+                        Text("No duration found")
                     }
                     
-                    GridRow {
-                        if let duration = detail.runtime {
-                            let hours = duration / 60
-                            let minutes = duration % 60
-                            Text("Duration: \(hours) h \(minutes) mins")
-                                .frame(width: 120, alignment: .leading)
-                        } else {
-                            Text("No duration found")
-                        }
-                        Text("Original language: \(detail.originalLanguage ?? "")")
-                            .frame(width: 120, alignment: .leading)
-                    }
+                    Text("Original language: \(detail.originalLanguage ?? "")")
+                        .font(.headline)
+                        .bold()
                     
-                    GridRow {
-                        Text("Budget: \(formatNumber(detail.budget ?? 0))")
-                        Text("Revenue: \(formatNumber(detail.revenue ?? 0))")
+                    HStack(spacing: 8) {
+                        Text("Budget: $\(formatNumber(detail.budget ?? 0))")
+                            .font(.headline)
+                            .bold()
+                        Text("Revenue: $\(formatNumber(detail.revenue ?? 0))")
+                            .font(.headline)
+                            .bold()
                     }
                 }
                 .padding(.horizontal)
@@ -104,7 +112,8 @@ struct MovieDetailsView: View {
                             cmvm: cmvm,
                             movieId: detail.id,
                             posterPath: detail.posterPath ?? "",
-                            title: detail.title ?? "")
+                            title: detail.title ?? "",
+                            genres: detail.genres ?? [])
                     } label: {
                         Text("Add to records")
                     }
