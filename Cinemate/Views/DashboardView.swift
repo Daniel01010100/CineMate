@@ -20,7 +20,7 @@ struct DashboardView: View {
                         .padding(.horizontal)
                         .foregroundColor(cmvm.cinemateColor)
                 } else {
-                    Text("Welcome back, \(cmvm.user.username)!")
+                    Text("Welcome back, \(cmvm.user.username).")
                         .font(.largeTitle)
                         .bold()
                         .padding(.horizontal)

@@ -147,8 +147,11 @@ struct PersistenceController {
                 basics.voteCount = Int(entity.voteCount)
                 
                 // Convert the genre relationship to an array that stores genre id.
-                if let genres = entity.genre as? Set<Genre> {
+                if let genreSet = entity.genre as? NSSet,
+                   let genres = genreSet.allObjects as? [Genre] {
                     basics.genreIds = genres.map { Int($0.id) }.sorted()
+                } else {
+                    basics.genreIds = []
                 }
                 return basics
             }

@@ -87,6 +87,19 @@ struct MovieDetailsView: View {
                 Divider()
                     .padding(.vertical)
                 
+                VStack(alignment: .center, spacing: 10) {
+                    Text("Overview")
+                        .font(.headline)
+                        .bold()
+                    
+                    Text(detail.overview ?? "Empty overview")
+                        .font(.body)
+                        .multilineTextAlignment(.leading)
+                        .padding(.top)
+                        .padding(.horizontal)
+                }
+                .padding(.horizontal)
+                            
                 VStack(spacing: 15) {
                     // Jump to official website, provided by TMDB API.
                     if let homepage = detail.homepage,
@@ -122,12 +135,8 @@ struct MovieDetailsView: View {
                     .tint(cmvm.cinemateColor)
                 }
                 .padding(.horizontal)
+                .padding(30)
                 
-                Text(detail.overview ?? "Empty overview")
-                    .font(.body)
-                    .multilineTextAlignment(.leading)
-                    .padding(.top)
-                    .padding(.horizontal)
             } else {
                 Text("No specific details found")
             }
