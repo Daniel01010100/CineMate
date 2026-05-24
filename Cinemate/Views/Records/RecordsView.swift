@@ -44,7 +44,15 @@ struct RecordsView: View {
                                 }
                                 
                                 ForEach(records) { record in
-                                    RecordCards(record: record)
+                                    RecordCards(
+                                        record: record,
+                                        onFavouriteToggle: {
+                                            if let index = cmvm.movieRecords.firstIndex(where: { $0.id == record.id }) {
+                                                cmvm.movieRecords[index].isFavourite.toggle()
+                                                cmvm.saveMovieRecords()
+                                            }
+                                        }
+                                    )
                                 }
                             }
                             .padding(.horizontal)

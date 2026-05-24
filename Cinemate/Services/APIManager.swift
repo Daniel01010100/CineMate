@@ -24,7 +24,7 @@ class APIManager : APIManagerProtocol {
     private var defaultHeaders: [String: String] {
         [
             "accept": "application/json",
-            "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNWM0YzYwZWE0MTFmNTUwMzE1M2ZjNTBmNjJhMmY5MCIsIm5iZiI6MTc1NzgzMjg2My4zNjcsInN1YiI6IjY4YzY2NjlmMmU0NmM3MTVlZjg2ODI1NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.d7LLdR_CqKLlby4iaEQHYKG5_U8AEaAcrDlN_xXny30"
+            "Authorization": "Bearer \(APISecrets.tmdbReadAccessToken)"
         ]
     }
     

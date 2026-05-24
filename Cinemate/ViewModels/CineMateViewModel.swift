@@ -57,7 +57,8 @@ final class CineMateViewModel {
             self._persistence.saveWatchlistMoviesToCoreData(self.watchlistMovies)
         } else {
             // If movie's data is already up-to-date
-            self.watchlistMovies = self._persistence.loadWatchlistMoviesFromCoreData()
+            self.watchlistMovies = self.getWatchlistMovies()
+            self.loadMovieRecords()
         }
 
         switch currentMode {
@@ -206,6 +207,12 @@ final class CineMateViewModel {
        return self._persistence.deleteMovieFromWatchlist(movie.id)
     }
     
+    func removeMovieFromWatchlist(_ movie: MovieBasics) {
+        if self.delMovieFromUserWatchlist(movie) {
+            self.watchlistMovies.removeAll { $0.id == movie.id }
+        }
+    }
+    
     func getWatchlistMovies() -> [MovieBasics] {
         return self._persistence.loadWatchlistMoviesFromCoreData()
     }
@@ -214,7 +221,7 @@ final class CineMateViewModel {
                         _ genres: [Genres] = [], _ cinemaId: UUID? = nil,
                         _ date: Date? = nil, _ format: [ViewingFormat] = [], _ rating: Double? = nil,
                         _ review: String? = nil, _ companions: [CompanionModel] = []) {
-        let newRecord = MovieRecords(movieId, posterPath, title, genres, cinemaId,
+        let newRecord = MovieRecords(movieId, false, posterPath, title, genres, cinemaId,
                                      date, format, rating, review, companions)
         self.movieRecords.append(newRecord)
         self._persistence.addMovieRecordToCoreData(newRecord)
@@ -231,6 +238,34 @@ final class CineMateViewModel {
     
     func loadMovieRecords() {
         self.movieRecords = self._persistence.loadMovieRecordsFromCoreData()
+    }
+    
+    func getFavouriteRecords() -> [MovieRecords] {
+        return self.movieRecords
+            .filter { $0.isFavourite }
+            .sorted { ($0.dateWatched ?? .distantPast) > ($1.dateWatched ?? .distantPast) }
+    }
+    
+    var latestWatchedRecord: MovieRecords? {
+        self.movieRecords
+            .sorted { ($0.dateWatched ?? .distantPast) > ($1.dateWatched ?? .distantPast) }
+            .first
+    }
+    
+    func updateRecordRating(_ recordId: UUID, rating: Double) {
+        guard let index = self.movieRecords.firstIndex(where: { $0.id == recordId }) else {
+            return
+        }
+        self.movieRecords[index].userRating = rating
+        self.saveMovieRecords()
+    }
+    
+    func toggleRecordFavourite(_ recordId: UUID) {
+        guard let index = self.movieRecords.firstIndex(where: { $0.id == recordId }) else {
+            return
+        }
+        self.movieRecords[index].isFavourite.toggle()
+        self.saveMovieRecords()
     }
     
     func addCinema(_ cinema: CinemaModel) {

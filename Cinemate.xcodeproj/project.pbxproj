@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2FC4A96E2FC2DAE200D251B2 /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 2FC4A96D2FC2DAE200D251B2 /* Secrets.xcconfig */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		2F2D87332E76A50E004EF593 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,11 +31,25 @@
 		2F2D871D2E76A50D004EF593 /* Cinemate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cinemate.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2F2D87322E76A50E004EF593 /* CinemateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CinemateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2F2D873C2E76A50E004EF593 /* CinemateUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CinemateUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2FC4A96D2FC2DAE200D251B2 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2FC4A96C2FC2D94D00D251B2 /* Exceptions for "Cinemate" folder in "Cinemate" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 2F2D871C2E76A50D004EF593 /* Cinemate */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2F2D871F2E76A50D004EF593 /* Cinemate */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2FC4A96C2FC2D94D00D251B2 /* Exceptions for "Cinemate" folder in "Cinemate" target */,
+			);
 			path = Cinemate;
 			sourceTree = "<group>";
 		};
@@ -79,6 +97,7 @@
 				2F2D87352E76A50E004EF593 /* CinemateTests */,
 				2F2D873F2E76A50E004EF593 /* CinemateUITests */,
 				2F2D871E2E76A50D004EF593 /* Products */,
+				2FC4A96D2FC2DAE200D251B2 /* Secrets.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -212,6 +231,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2FC4A96E2FC2DAE200D251B2 /* Secrets.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -390,6 +410,7 @@
 		};
 		2F2D87472E76A50E004EF593 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2FC4A96D2FC2DAE200D251B2 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -399,6 +420,7 @@
 				DEVELOPMENT_TEAM = 36LSTRPD92;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Cinemate/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -419,6 +441,7 @@
 		};
 		2F2D87482E76A50E004EF593 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2FC4A96D2FC2DAE200D251B2 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -428,6 +451,7 @@
 				DEVELOPMENT_TEAM = 36LSTRPD92;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Cinemate/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

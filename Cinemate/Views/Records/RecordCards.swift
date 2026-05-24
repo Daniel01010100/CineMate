@@ -9,9 +9,18 @@ import SwiftUI
 
 struct RecordCards: View {
     let record: MovieRecords
+    var onFavouriteToggle: (() -> Void)? = nil
     
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
+            Button(action: {
+                onFavouriteToggle?()
+            }) {
+                Image(systemName: record.isFavourite ? "heart.fill" : "heart")
+                    .font(.title3)
+                    .foregroundColor(.red)
+            }
+            
             AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/w500\(record.moviePosterURLSnapshot ?? "")")) { phase in
                 switch phase {
                 case .empty:
@@ -35,7 +44,7 @@ struct RecordCards: View {
             
             VStack(alignment: .leading) {
                 Text(record.movieTitle ?? "")
-                    .bold()
+                    .bold()  
                     .font(.headline)
                 if let date = record.dateWatched {
                     let year = Calendar.current.component(.year, from: date)
@@ -62,3 +71,4 @@ struct RecordCards: View {
         .padding(.horizontal, 10)
     }
 }
+

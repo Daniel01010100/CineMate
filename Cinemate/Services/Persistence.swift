@@ -348,6 +348,7 @@ struct PersistenceController {
 
         // Update attributes fields
         entity.id = movieRecord.id
+	entity.isFavourite = movieRecord.isFavourite
         entity.movieId = Int64(movieRecord.movieId)
         entity.moviePosterURLSnapshot = movieRecord.moviePosterURLSnapshot
         entity.movieTitle = movieRecord.movieTitle
@@ -356,6 +357,8 @@ struct PersistenceController {
         entity.viewingFormat = movieRecord.viewingFormat.map { $0.rawValue }.joined(separator: ",")
         entity.userRating = movieRecord.userRating ?? 0.0
         entity.review = movieRecord.review
+
+        
 
         // Save context
         do {
@@ -375,6 +378,7 @@ struct PersistenceController {
             if let target = try context.fetch(fetch).first {
                 context.delete(target)
                 try context.save()
+                UserDefaults.standard.removeObject(forKey: "record_favourite_\(recordId.uuidString)")
             }
         } catch {
             print("Failed to delete record from Core Data: \(error)")
@@ -401,6 +405,7 @@ struct PersistenceController {
             
             entity.id = movieRecord.id
             entity.movieId = Int64(movieRecord.movieId)
+            entity.isFavourite = movieRecord.isFavourite
             entity.moviePosterURLSnapshot = movieRecord.moviePosterURLSnapshot
             entity.movieTitle = movieRecord.movieTitle
             entity.cinemaId = movieRecord.cinemaId
@@ -453,6 +458,7 @@ struct PersistenceController {
                 var records = MovieRecords()
                 records.id = e.id!
                 records.movieId = Int(e.movieId)
+                records.isFavourite = e.isFavourite
                 records.moviePosterURLSnapshot = e.moviePosterURLSnapshot
                 records.movieTitle = e.movieTitle
                 records.cinemaId = e.cinemaId
@@ -522,5 +528,25 @@ struct PersistenceController {
             print("Failed to load user profile from Core Data: \(error)")
         }
         return nil
+    }
+}
+
+extension Record {
+    private var favouriteKey: String {
+        if let id = self.id {
+            return "record_favourite_\(id.uuidString)"
+        } else {
+            return "record_favourite_nil"
+        }
+    }
+
+    var isFavourite: Bool {
+        get {
+            UserDefaults.standard.bool(forKey: favouriteKey)
+        }
+        set {
+            guard self.id != nil else { return }
+            UserDefaults.standard.set(newValue, forKey: favouriteKey)
+        }
     }
 }
