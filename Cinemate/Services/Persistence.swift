@@ -456,13 +456,13 @@ struct PersistenceController {
             let entities = try context.fetch(fetch)
             return entities.map{ e in
                 var records = MovieRecords()
-                records.id = e.id!
+                records.id = e.id ?? UUID()
                 records.movieId = Int(e.movieId)
                 records.isFavourite = e.isFavourite
                 records.moviePosterURLSnapshot = e.moviePosterURLSnapshot
                 records.movieTitle = e.movieTitle
                 records.cinemaId = e.cinemaId
-                records.dateWatched = e.dateWatched!
+                records.dateWatched = e.dateWatched ?? Date()
                 records.viewingFormat = e.viewingFormat?.split(separator: ",").compactMap { ViewingFormat(rawValue: String($0)) } ?? []
                 records.userRating = e.userRating
                 records.review = e.review

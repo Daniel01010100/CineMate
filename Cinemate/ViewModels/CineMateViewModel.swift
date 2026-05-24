@@ -252,7 +252,7 @@ final class CineMateViewModel {
             .first
     }
     
-    func updateRecordRating(_ recordId: UUID, rating: Double) {
+    func updateRecordRating(_ recordId: UUID, _ rating: Double) {
         guard let index = self.movieRecords.firstIndex(where: { $0.id == recordId }) else {
             return
         }

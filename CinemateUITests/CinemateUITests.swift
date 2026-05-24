@@ -29,6 +29,31 @@ final class CinemateUITests: XCTestCase {
         app.launch()
 
         // Use XCTAssert and related functions to verify your tests produce the correct results.
+        XCTAssertTrue(app.tabBars.firstMatch.exists)
+    }
+    
+    @MainActor
+    func testTabNavigation() throws {
+        let app = XCUIApplication()
+        app.launch()
+        
+        app.tabBars.buttons["Records"].tap()
+        XCTAssertTrue(app.buttons["Genre"].exists)
+        XCTAssertTrue(app.buttons["Year"].exists)
+        XCTAssertTrue(app.buttons["Companionship"].exists)
+        
+        app.tabBars.buttons["Dashboard"].tap()
+        XCTAssertTrue(app.tabBars.firstMatch.exists)
+    }
+    
+    @MainActor
+    func testMovieSearchFieldExists() throws {
+        let app = XCUIApplication()
+        app.launch()
+        
+        app.tabBars.buttons["Movies"].tap()
+        
+        XCTAssertTrue(app.textFields.firstMatch.exists)
     }
 
     @MainActor

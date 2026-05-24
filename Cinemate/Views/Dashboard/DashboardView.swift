@@ -203,7 +203,7 @@ struct DashboardView: View {
         HStack(spacing: 6) {
             ForEach(1...5, id: \.self) { star in
                 Button {
-                    cmvm.updateRecordRating(record.id, rating: Double(star))
+                    cmvm.updateRecordRating(record.id, Double(star))
                 } label: {
                     Image(systemName: star <= Int(record.userRating ?? 0) ? "star.fill" : "star")
                         .foregroundStyle(.yellow)
